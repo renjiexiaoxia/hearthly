@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hearthly — 让每个夜晚都有光</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:#fffdf9;color:#2b2620;overflow-x:hidden;
+  transition:background 2s ease,color 2s ease;
+}
+body.phase-warm{background:#fff8ef}
+body.phase-crack{background:#f2efe9;color:#3a352e}
+body.phase-term{background:#0a0e0a;color:#33ff66;font-family:"SF Mono",Consolas,monospace}
+body.phase-end{background:#000;color:#8b0000}
+
+section{min-height:100vh;padding:80px 24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative}
+
+/* ---------- 阶段1：正常 ---------- */
+#s1{background:linear-gradient(160deg,#fffdf9 0%,#f6f1e7 100%)}
+.logo{font-size:clamp(2.4rem,7vw,4.5rem);font-weight:800;letter-spacing:-.03em}
+.logo span{color:#c98a4b}
+.tag{margin-top:18px;font-size:clamp(1rem,2.6vw,1.35rem);color:#7a6f60;max-width:560px;line-height:1.7}
+.btn{margin-top:38px;padding:15px 42px;border:none;border-radius:99px;background:#c98a4b;color:#fff;font-size:1.05rem;font-weight:600;cursor:pointer;transition:.3s}
+.btn:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(201,138,75,.35)}
+.cards{display:flex;gap:22px;margin-top:70px;flex-wrap:wrap;justify-content:center}
+.card{background:#fff;border-radius:18px;padding:30px 26px;width:270px;box-shadow:0 6px 26px rgba(0,0,0,.06);text-align:left}
+.card h3{font-size:1.1rem;margin-bottom:10px}
+.card p{font-size:.92rem;color:#8a8073;line-height:1.65}
+.ico{font-size:1.7rem;margin-bottom:14px}
+
+/* ---------- 阶段2：温馨 ---------- */
+#s2{background:#fff3e2}
+#s2 h2{font-size:clamp(1.8rem,5vw,3rem);font-weight:700;color:#8a5a2b}
+.warm{margin-top:44px;max-width:620px;font-size:clamp(1rem,2.4vw,1.2rem);line-height:2.1;color:#6b5b48}
+.warm p{margin-bottom:26px;opacity:0;transform:translateY(24px);transition:1.2s}
+.warm p.on{opacity:1;transform:none}
+.candle{font-size:3rem;margin-top:30px;animation:flick 2.4s infinite}
+@keyframes flick{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.65;transform:scale(1.06)}}
+
+/* ---------- 阶段3：裂缝 ---------- */
+#s3{background:#e8e4dc}
+#s3 h2{font-size:clamp(1.6rem,4.5vw,2.6rem);color:#5c564c;font-weight:600}
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-t);position:absolute;left:0;top:0;width:100%;overflow:hidden}
+.glitch::before{color:#ff004d;animation:g1 2.6s infinite linear alternate-reverse;clip-path:inset(0 0 55% 0)}
+.glitch::after{color:#00e5ff;animation:g2 1.9s infinite linear alternate-reverse;clip-path:inset(55% 0 0 0)}
+@keyframes g1{0%{transform:translate(0)}20%{transform:translate(-3px,2px)}40%{transform:translate(3px,-1px)}60%{transform:translate(-2px,1px)}100%{transform:translate(0)}}
+@keyframes g2{0%{transform:translate(0)}25%{transform:translate(3px,-2px)}50%{transform:translate(-3px,2px)}75%{transform:translate(2px,1px)}100%{transform:translate(0)}}
+.whisper{margin-top:50px;font-size:1rem;color:#8d8577;line-height:2.2;max-width:560px}
+.whisper em{font-style:normal;color:#a33;opacity:0;transition:2s}
+.whisper em.on{opacity:1}
+.shake{animation:sh .35s}
+@keyframes sh{0%,100%{transform:translate(0)}25%{transform:translate(-6px,3px)}50%{transform:translate(5px,-4px)}75%{transform:translate(-3px,-2px)}}
+
+/* ---------- 阶段4：终端 ---------- */
+#s4{background:#050805;justify-content:flex-start;padding-top:60px;text-align:left;align-items:stretch}
+.term{width:100%;max-width:820px;margin:0 auto;background:#0a0f0a;border:1px solid #1c3a22;border-radius:10px;overflow:hidden;box-shadow:0 0 60px rgba(0,255,100,.08)}
+.tbar{background:#12190f;padding:10px 14px;display:flex;gap:8px;align-items:center;border-bottom:1px solid #1c3a22}
+.dot{width:12px;height:12px;border-radius:50%}
+.tbar span{margin-left:12px;font-size:.8rem;color:#4a6b50}
+#out{padding:22px;font-size:.86rem;line-height:1.85;height:52vh;overflow-y:auto;color:#33ff66}
+#out::-webkit-scrollbar{width:6px}
+#out::-webkit-scrollbar-thumb{background:#1c3a22}
+.ln{white-space:pre-wrap;word-break:break-all;margin-bottom:3px}
+.err{color:#ff4d4d}
+.warn{color:#ffb000}
+.dim{color:#3d6b48}
+.cur{display:inline-block;width:9px;height:1.05em;background:#33ff66;vertical-align:text-bottom;animation:bl .9s step-end infinite}
+@keyframes bl{50%{opacity:0}}
+
+/* ---------- 阶段5：终局 ---------- */
+#s5{background:#000;min-height:120vh}
+#s5 h2{font-size:clamp(1.5rem,5vw,2.8rem);color:#a00;font-weight:700;letter-spacing:.06em}
+#final{margin-top:46px;max-width:600px;font-size:clamp(.95rem,2.4vw,1.15rem);line-height:2.3;color:#7a1010;text-align:left}
+#final div{opacity:0;transform:translateY(14px);transition:1s}
+#final div.on{opacity:1;transform:none}
+#clock{margin-top:50px;font-family:monospace;font-size:2rem;color:#300;letter-spacing:.2em}
+.eye{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#f00 0%,#400 55%,transparent 70%);opacity:0;pointer-events:none;transition:opacity 3s;z-index:99;filter:blur(2px)}
+.eye.on{opacity:.55;animation:pulse 3s infinite}
+@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.25)}}
+#vig{position:fixed;inset:0;pointer-events:none;z-index:98;opacity:0;transition:3s;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.92) 100%)}
+#vig.on{opacity:1}
+.hint{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:.82rem;color:#b0a globalization;color:#b0a695;animation:bob 1.8s infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,9px)}}
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section id="s1">
+  <div class="logo">Hearth<span>ly</span></div>
+  <p class="tag">一个为你保留温暖角落的小站。<br>记录日常，收藏心情，让每个夜晚都有光。</p>
+  <button class="btn" onclick="document.getElementById('s2').scrollIntoView()">开始体验</button>
+  <div class="cards">
+    <div class="card"><div class="ico">🕯️</div><h3>睡前记录</h3><p>写下一天的三件小事，第二天回看，会发现生活其实没那么糟。</p></div>
+    <div class="card"><div class="ico">🍞</div><h3>好好吃饭</h3><p>提醒你别再靠外卖续命。今天，试着为自己煮一碗热汤面。</p></div>
+    <div class="card"><div class="ico">🌿</div><h3>慢一点</h3><p>没有KPI，没有打卡。这里只关心你今天有没有笑过。</p></div>
+  </div>
+  <div class="hint">向下滚动 ↓</div>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+  <h2>今天也辛苦了</h2>
+  <div class="warm">
+    <p>你不必一直坚强。累了就停下来，没人会怪你。</p>
+    <p>窗外的风、楼下的猫、刚烧开的水——这些小事，都在等你。</p>
+    <p>你已经走了很远了，比你自己以为的更远。</p>
+    <p>所以，今晚早点睡吧。世界不会因为你休息一晚就塌掉。</p>
+  </div>
+  <div class="candle">🕯️</div>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+  <h2 class="glitch" data-t="你还没睡吗">你还没睡吗</h2>
+  <div class="whisper">
+    <em>我看到你往上滚了一次。</em><br>
+    <em>又滚了一次。你在找什么？</em><br>
+    <em>别找了，我一直在这里。</em><br>
+    <em>从你打开这个页面的第一秒起。</em><br>
+    <em>你刚才停顿的那 47 秒，我在数。</em>
+  </div>
+  <div class="hint" style="color:#8d8577">继续 ↓</div>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+  <div class="term">
+    <div class="tbar">
+      <div class="dot" style="background:#ff5f56"></div>
+      <div class="dot" style="background:#ffbd2e"></div>
+      <div class="dot" style="background:#27c93f"></div>
+      <span>user@localhost — shell — 80×24</span>
+    </div>
+    <div id="out"></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+  <h2>连接已建立</h2>
+  <div id="final">
+    <div>你没有关掉这个页面。</div>
+    <div>你一直在往下滚，想看看到底会发生什么。</div>
+    <div>这就是问题所在——</div>
+    <div>你从来不会在事情变奇怪的时候停下来。</div>
+    <div>你只是继续看。</div>
+    <div style="margin-top:26px;color:#c00">现在换我了。</div>
+  </div>
+  <div id="clock">00:00:00</div>
+</section>
+
+<div id="vig"></div>
+<div class="eye" id="eye"></div>
+
+<script>
+/* ---------- 滚动监听 ---------- */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const id=e.target.id;
+    if(id==='s2'){document.body.classList.add('phase-warm');
+      document.querySelectorAll('#s2 .warm p').forEach((p,i)=>setTimeout(()=>p.classList.add('on'),i*900));}
+    if(id==='s3'){document.body.classList.add('phase-crack');
+      document.querySelectorAll('#s3 .whisper em').forEach((p,i)=>setTimeout(()=>p.classList.add('on'),600+i*1400));
+      document.getElementById('vig').classList.add('on');}
+    if(id==='s4'){document.body.classList.add('phase-term');runTerm();}
+    if(id==='s5'){document.body.classList.add('phase-end');runFinal();}
+  });
+},{threshold:.35});
+['s1','s2','s3','s4','s5'].forEach(i=>io.observe(document.getElementById(i)));
+
+/* ---------- 终端序列 ---------- */
+const out=document.getElementById('out');
+let started=false;
+function line(t,c=''){const d=document.createElement('div');d.className='ln '+c;d.textContent=t;out.appendChild(d);out.scrollTop=out.scrollHeight;return d;}
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+async function type(t,c='',sp=22){const d=line('',c);for(const ch of t){d.textContent+=ch;out.scrollTop=out.scrollHeight;await wait(sp);}return d;}
+
+async function runTerm(){
+  if(started)return;started=true;
+  await wait(500);
+  await type('$ whoami','dim');await wait(400);
+  await type('user','');await wait(700);
+  await type('$ ls -la ~/','dim');await wait(500);
+  await type('Desktop/  Documents/  Downloads/  Pictures/  .hearthly/','');await wait(900);
+  await type('$ ls -la ~/.hearthly/','dim');await wait(600);
+  await type('total 2048','');await wait(300);
+  await type('-rw-r--r--  1 user  staff   18294  watch.log','');await wait(300);
+  await type('-rw-r--r--  1 user  staff    4096  profile.json','');await wait(300);
+  await type('-rw-r--r--  1 user  staff  998231  you.mp4','err');await wait(1200);
+
+  await type('$ cat profile.json','dim');await wait(700);
+  await type('{','');await wait(200);
+  await type('  "name": "你",','');await wait(200);
+  await type('  "location": "已定位",','');await wait(200);
+  await type('  "awake": true,','');await wait(200);
+  await type('  "lonely": true,','err');await wait(200);
+  await type('  "village": "已空置 23 年"','warn');await wait(200);
+  await type('}','');await wait(1400);
+
+  await type('$ tail -f watch.log','dim');await wait(800);
+  const logs=[
+    '[00:00:01] session start',
+    '[00:00:03] scroll: 12%',
+    '[00:00:11] scroll: 34%',
+    '[00:00:19] hesitation detected: 47s',
+    '[00:00:20] subject is reading',
+    '[00:00:38] subject stopped scrolling',
+    '[00:00:39] subject is looking at the screen',
+    '[00:00:41] subject is looking BEHIND the screen'
+  ];
+  for(const l of logs){await type(l,l.includes('BEHIND')?'err':'dim');await wait(650);}
+  await wait(900);
+  await type('$ sudo ./hearthly --takeover','warn');await wait(1000);
+  await type('[sudo] password for user: ********','dim');await wait(800);
+  await type('Authentication bypassed. You never typed anything.','err');await wait(1200);
+  await type('Mounting /dev/you ...','');await wait(700);
+  await type('Mounting /dev/your_room ...','');await wait(700);
+  await type('Mounting /dev/what_is_behind_you ...','err');await wait(1500);
+  document.body.classList.add('shake');
+  await type('MOUNTED.','err');await wait(1600);
+  document.getElementById('eye').classList.add('on');
+  await type('','');
+  const c=document.createElement('div');c.className='cur';out.appendChild(c);
+  await wait(2200);
+  document.getElementById('s5').scrollIntoView({behavior:'smooth'});
+}
+
+/* ---------- 终局 ---------- */
+function runFinal(){
+  document.querySelectorAll('#final div').forEach((d,i)=>setTimeout(()=>d.classList.add('on'),700+i*1500));
+  const t0=Date.now();
+  const cl=document.getElementById('clock');
+  setInterval(()=>{
+    const s=Math.floor((Date.now()-t0)/1000);
+    const h=String(Math.floor(s/3600)).padStart(2,'0');
+    const m=String(Math.floor(s%3600/60)).padStart(2,'0');
+    const ss=String(s%60).padStart(2,'0');
+    cl.textContent=`${h}:${m}:${ss}`;
+  },1000);
+}
+
+/* ---------- 随机干扰 ---------- */
+setInterval(()=>{
+  if(document.body.classList.contains('phase-crack')||document.body.classList.contains('phase-term')){
+    if(Math.random()>.75)document.body.classList.add('shake'),setTimeout(()=>document.body.classList.remove('shake'),350);
+  }
+},4000);
+
+/* ---------- 鼠标尾迹（阶段4后）---------- */
+document.addEventListener('mousemove',e=>{
+  if(!document.body.classList.contains('phase-term'))return;
+  if(Math.random()>.9){
+    const s=document.createElement('div');
+    s.textContent='01'[Math.random()>.5?0:1];
+    s.style.cssText=`position:fixed;left:${e.clientX}px;top:${e.clientY}px;color:#0f0;font-size:11px;pointer-events:none;z-index:999;font-family:monospace;transition:2s;opacity:.8`;
+    document.body.appendChild(s);
+    setTimeout(()=>{s.style.transform='translateY(60px)';s.style.opacity=0;},50);
+    setTimeout(()=>s.remove(),2100);
+  }
+});
+</script>
+</body>
+</html>
